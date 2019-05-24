@@ -131,15 +131,7 @@ const initializeAttrs = userFound => {
     userFound.finalPermission = "";
     userFound.permissionFound = false;
   };
-// const checkWhenFunctionInRequiredPermissions = newUser => {
-//   let found = false;
-//   newUser.requiredPermissions.map(permission => {
-//     if (permission.whenFunction !== "") {
-//       found = true;
-//     }
-//   });
-//   return found;
-// };
+
 const to = (target, newUser) => {
   if (!aclInstance.checking) {
     let end = newUser.permissions.length - 1;
