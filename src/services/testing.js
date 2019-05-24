@@ -37,18 +37,22 @@ a('reader').can('put').to('/books/addComment')
  }
 export const checkPermissions = ()=>{
     try{
-        console.log(check.if('writer').can('get').from('/books')); //true
-        console.log(check.if('writer').can('post').to('/reviews')); //false
-        console.log(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:20})); //false
-        console.log(check.if('writer').can('put').to('/books/12/addReview').when({writerID:20,id:12},{id:560})); //true
-        console.log(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:10})); //true
-        console.log(check.if('reader').can('put').to('/books/approvebook')); //false
-        console.log(check.if('reader').can('get').from('/books')); //true
-        console.log(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:true})); //true
-        console.log(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:false})); //false
-        console.log(check.if('admin').can('put').from('/books/approvebook')); //true
+        let results = [];
+        results.push(check.if('writer').can('get').from('/books')) //true
+        results.push(check.if('writer').can('post').to('/reviews')); //false
+        results.push(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:20})); //false
+        results.push(check.if('writer').can('put').to('/books/12/addReview').when({writerID:20,id:12},{id:560})); //true
+        results.push(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:10})); //true
+        results.push(check.if('reader').can('put').to('/books/approvebook')); //false
+        results.push(check.if('reader').can('get').from('/books')); //true
+        results.push(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:true})); //true
+        results.push(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:false})); //false
+        results.push(check.if('admin').can('put').from('/books/approvebook')); //true
+        results.forEach((result)=>{
+            console.log(result);
+        })
         console.log(acl.errorMessages);
-        return acl.errorMessages;
+        return {errors:acl.errorMessages,results:results};
     }catch(err){
         console.log(err)
     }

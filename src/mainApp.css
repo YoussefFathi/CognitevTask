@@ -25,3 +25,8 @@
 .mainWindow button:hover{
     background-color: rgba(135, 207, 235, 0.582);
 }
+ .messages{
+    display: flex;
+    justify-content: space-between;
+    width:1400px;
+}
