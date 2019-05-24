@@ -12,7 +12,7 @@ For testing purposes, I simulated having an online books publishing application.
 -- Admin can remove/approve a certain book by a certain writer, or remove any comment/review made on an book.  
 -- Reader can read any book or search for a specific book, and also can add comments on any book.  
 
-To view the checks made open the function `checkPermission()` in `testing.js` file.  
+To view the checks made open the function `checkPermissions()` in `testing.js` file.  
 
 #### To run the checks  
 1- Clone the repository  
