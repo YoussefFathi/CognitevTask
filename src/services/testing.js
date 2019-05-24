@@ -4,30 +4,51 @@ import { an, check, a } from "./acl";
  // create different roles
 export const createNeededRoles = ()=>{
  acl.createRole("admin");
- acl.createRole("user");
- acl.createRole("guest");
- acl.createRole("amir");
+ acl.createRole("writer");
+ acl.createRole("reader");
  }
 export const setPermissions = ()=>{
-// admin can list all users
-an('admin').can('get').from('/users');
-// admin can create users
-an('admin').can('post').to('/users');
-// user can post an article only when it's his data
-a('user').can('post').to('/users/:userId/articles').when((params, user) =>
-user.id === params.userId);
-a('user').can('get').from('/users/:userId/books/:bookId/:stateID').when((params,user,book,state) =>
-user.id === params.userId&& book.bookId===params.bookId && params.stateID === state.stateID);
-// guest can get data from articles
-a('guest').can('get').from('/articles');
+try{
+// a writer can view all books
+a('writer').can('get').from('/books');
+
+// a writer can post a book
+a('writer').can('post').to('/books');
+
+// a writer can write a review on book not written by him
+a('writer').can('put').to('/books/:bookID/addReview').when((params,book,writer)=>
+  ((params.bookID===book.id)&&!(book.writerID===writer.id))
+);
+
+// an admin can approve a book
+an('admin').can('put').to('/books/approvebook')
+
+// an admin can remove a book only if the book is not original
+an('admin').can('delete').from('/books/:bookID').when((params,book)=>params.bookID===book.id&&book.isOriginal===true)
+
+// a reader can view all books
+a('reader').can('get').from('/books');
+
+// a reader can add comment on a book
+a('reader').can('put').to('/books/addComment')
+}catch(err){
+    console.log(err);
+}
  }
 export const checkPermissions = ()=>{
     try{
-        console.log(check.if('guest').can('get').from('/articles'));
-        console.log(check.if('admin').can('post').to('/users'));
-        console.log(check.if('user').can('post').to('/users/10/articles').when({id:10}));
-        console.log(check.if('user').can('get').from('/users/10/books/12/12').when({id:10},{bookId:12},{stateID:12}));
+        console.log(check.if('writer').can('get').from('/books')); //true
+        console.log(check.if('writer').can('post').to('/reviews')); //false
+        console.log(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:20})); //false
+        console.log(check.if('writer').can('put').to('/books/12/addReview').when({writerID:20,id:12},{id:560})); //true
+        console.log(check.if('writer').can('put').to('/books/10/addReview').when({writerID:20,id:10},{id:10})); //true
+        console.log(check.if('reader').can('put').to('/books/approvebook')); //false
+        console.log(check.if('reader').can('get').from('/books')); //true
+        console.log(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:true})); //true
+        console.log(check.if('admin').can('delete').from('/books/12').when({id:12,isOriginal:false})); //false
+        console.log(check.if('admin').can('put').from('/books/approvebook')); //true
         console.log(acl.errorMessages);
+        return acl.errorMessages;
     }catch(err){
         console.log(err)
     }

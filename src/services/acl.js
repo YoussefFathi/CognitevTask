@@ -3,6 +3,7 @@ class acl {
     this.users = [];
     this.roles = [];
     this.checking = false;
+    this.checkingCount=0;//Keep track of number of checking statements called
     this.errorMessages = []; //Logging all error messages generated while checking the permissions
   }
   createRole = role => {
@@ -54,8 +55,8 @@ class acl {
             );
             if (!returnOfWhen) {
               //When function returned false
-              aclInstance.errorMessages.push(
-                "Parameter values in when function are not matching"
+              aclInstance.errorMessages.push("Check No: "+aclInstance.checkingCount+
+                " => Parameter values in when function are not matching"
               );
             }
             return returnOfWhen;
@@ -107,7 +108,7 @@ export const check = {
     let falseUser = aclInstance.createUser();
     falseUser.isFalse = true; // Dummy user role having value false to be bubbled till to() function
     if (!checkRoleExists(role)) {
-      aclInstance.errorMessages.push("Role (" + role + ") doesn't exist");
+      aclInstance.errorMessages.push("Check No: "+aclInstance.checkingCount+" => Role (" + role + ") doesn't exist");
       return falseUser;
     }
     let userFound = checkUserExists(role);
@@ -115,8 +116,8 @@ export const check = {
       initializeAttrs(userFound);
       return userFound;
     } else {
-      aclInstance.errorMessages.push(
-        "NO permissions for role: ( " + role + " ) yet"
+      aclInstance.errorMessages.push("Check No: "+aclInstance.checkingCount+
+        " => NO permissions for role: ( " + role + " ) yet"
       );
       return falseUser;
     }
@@ -174,6 +175,7 @@ const setParamsKeys = (target, newUser) => {
         let currentPermission = newUser.permissions[end];
         let parameterName = division.slice(1);
         currentPermission.params[parameterName] = i; //Value for the parameters will be set while checking
+        currentPermission.permenantParams[parameterName]=i;
       }
     }
   }
@@ -185,13 +187,14 @@ const can = (httpVerb, newUser) => {
       httpVerb: httpVerb,
       target: "",
       params: [],
+      permenantParams:[],
       whenFunction: ""
     };
     newUser.permissions.push(newPermission);
   } else {
     if (!addRequiredPermissionsIfExists(newUser, httpVerb)) {
-      aclInstance.errorMessages.push(
-        "The Http verb: ( " +
+      aclInstance.errorMessages.push("Check No: "+aclInstance.checkingCount+
+        " => The Http verb: ( " +
           httpVerb +
           " ) didn't match any corresponding permission for (" +
           newUser.role +
@@ -236,8 +239,8 @@ const setParamsValues = (user, target) => {
   });
   if (!user.permissionFound) {
     //No Corresponding Permission was found for target specified
-    aclInstance.errorMessages.push(
-      "NO Corresponding endpoint was found for ( " +
+    aclInstance.errorMessages.push("Check No: "+aclInstance.checkingCount+
+      " => NO Corresponding endpoint was found for ( " +
         target +
         " ), httpVerb: " +
         user.requiredPermissions[0].httpVerb +
@@ -247,13 +250,14 @@ const setParamsValues = (user, target) => {
     return false;
   } else if (user.finalPermission !== "") {
     let params = user.finalPermission.params;
+    let permenantParams = user.finalPermission.permenantParams;
     Object.keys(params).map(key => {
       //Traversing the params to set their values based on matching target
-      if (isPositiveInteger(targetDivisions[params[key]]))
+      if (isPositiveInteger(targetDivisions[permenantParams[key]]))
         //checking if value is an integer for correct comparison
-        params[key] = parseInt(targetDivisions[params[key]] + "");
+        params[key] = parseInt(targetDivisions[permenantParams[key]] + "");
       else {
-        params[key] = targetDivisions[params[key]] + "";
+        params[key] = targetDivisions[permenantParams[key]] + "";
       }
     });
     return true;
@@ -275,6 +279,7 @@ const addRequiredPermissionsIfExists = (user, httpVerb) => {
 const setChecking = () => {
   //Started Checking
   aclInstance.checking = true;
+  aclInstance.checkingCount++;
 };
 const checkRoleExists = role => {
   //Checking if role was created
