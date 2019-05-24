@@ -13,9 +13,9 @@ For testing purposes, we simulated having an online books publishing application
 -- Reader can read any book or search for a specific book, and also can add comments on any book.  
 
 To view the checks made open the function `checkPermission()` in `testing.js` file.  
-  
+
 #### To run the checks  
 1- Clone the repository  
 2- Run command npm install  
 3- npm start  
-4- Click on start checking now to start the checks and view the results  
+4- Click on `Start Checking Now` to start the checks and view the results  
